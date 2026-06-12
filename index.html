@@ -1,440 +1,702 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Summary Insentif PIC</title>
+  <title>Dashboard Insentif & Gizi Dapur</title>
   <style>
+    :root {
+      --primary: #0d9488; /* Teal Professional */
+      --accent: #b45309;  /* Deep Gold */
+      --dark: #1e293b;
+      --gray: #64748b;
+      --light: #f8fafc;
+      --white: #ffffff;
+      --danger: #dc2626;
+    }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { 
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh; padding: 20px; color: #333;
+      font-family: 'Segoe UI', system-ui, sans-serif; 
+      background: linear-gradient(135deg, #0f766e 0%, #115e59 100%);
+      min-height: 100vh; padding: 20px; color: var(--dark);
       overflow-x: hidden;
     }
     .container { max-width: 1200px; margin: 0 auto; position: relative; z-index: 1; }
-    
-    .app-header {
-      background: rgba(255,255,255,0.15); backdrop-filter: blur(10px);
-      padding: 20px; border-radius: 16px; margin-bottom: 15px;
-      color: white; text-align: center;
-      border: 1px solid rgba(255,255,255,0.2); position: relative;
-    }
-    .app-header h1 { font-size: 24px; margin-bottom: 5px; }
-    .app-header p { font-size: 13px; opacity: 0.9; }
-    
-    .game-btn {
-      position: absolute; top: 15px; right: 15px;
-      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-      color: white; border: none; padding: 8px 14px; border-radius: 20px;
-      font-size: 12px; font-weight: 700; cursor: pointer;
-      box-shadow: 0 3px 10px rgba(245,87,108,0.4); animation: pulse 2s infinite;
-    }
-    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
 
-    .quote-box {
-      background: rgba(255,255,255,0.2); backdrop-filter: blur(8px);
-      padding: 14px 20px; border-radius: 12px; margin-bottom: 15px;
-      text-align: center; color: white;
-      border-left: 4px solid #f5576c; border-right: 4px solid #667eea;
-      min-height: 60px; display: flex; flex-direction: column;
-      justify-content: center; transition: opacity 0.5s;
+    /* HEADER BARU: JAM KIRI + INFO KANAN */
+    .top-dashboard {
+      display: grid; grid-template-columns: auto 1fr; gap: 20px;
+      margin-bottom: 20px; align-items: stretch;
     }
-    .quote-text { font-size: 14px; font-style: italic; font-weight: 500; }
-    .quote-author { font-size: 11px; margin-top: 4px; opacity: 0.8; }
-
-    .clock-widget {
-      display: flex; justify-content: center; align-items: center; gap: 25px;
-      background: white; padding: 20px 30px; border-radius: 60px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-      margin: 0 auto 25px auto; width: fit-content;
-      border: 3px solid rgba(255,255,255,0.5);
+    
+    /* JAM ANALOG (KIRI) */
+    .clock-panel {
+      background: var(--white); padding: 20px; border-radius: 20px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1); min-width: 200px;
+      border: 2px solid rgba(255,255,255,0.3);
     }
     .analog-clock {
-      width: 110px; height: 110px; border-radius: 50%;
-      background: #f8f9fa; border: 4px solid #667eea;
-      position: relative; box-shadow: inset 0 2px 8px rgba(0,0,0,0.1), 0 4px 10px rgba(0,0,0,0.1);
+      width: 120px; height: 120px; border-radius: 50%;
+      background: var(--light); border: 4px solid var(--primary);
+      position: relative; margin-bottom: 10px;
     }
-    .hand { position: absolute; bottom: 50%; left: 50%; transform-origin: bottom center; border-radius: 4px; transform: translateX(-50%) rotate(0deg); transition: transform 0.2s cubic-bezier(0.4, 2.08, 0.55, 1.44); }
-    .hour-hand { width: 5px; height: 28px; background: #2c3e50; z-index: 3; }
-    .minute-hand { width: 3px; height: 38px; background: #34495e; z-index: 4; }
-    .second-hand { width: 2px; height: 45px; background: #e74c3c; z-index: 5; transition: none; }
-    .center-dot { position: absolute; width: 10px; height: 10px; background: #e74c3c; border: 2px solid white; border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; }
-    .tick { position: absolute; font-size: 12px; font-weight: 800; color: #667eea; }
-    .t12 { top: 6px; left: 50%; transform: translateX(-50%); }
-    .t3 { top: 50%; right: 8px; transform: translateY(-50%); }
-    .t6 { bottom: 6px; left: 50%; transform: translateX(-50%); }
-    .t9 { top: 50%; left: 8px; transform: translateY(-50%); }
-    .digital-info { text-align: left; }
-    .digital-time { font-size: 28px; font-weight: 800; color: #2c3e50; letter-spacing: 1.5px; font-family: 'Courier New', monospace; }
-    .digital-zone { font-size: 14px; font-weight: 700; color: #e74c3c; margin-left: 5px; }
-    .digital-date { font-size: 13px; color: #7f8c8d; margin-top: 4px; font-weight: 500; }
+    .hand { position: absolute; bottom: 50%; left: 50%; transform-origin: bottom center; border-radius: 4px; transform: translateX(-50%); }
+    .hour-hand { width: 4px; height: 30px; background: var(--dark); z-index: 3; }
+    .minute-hand { width: 3px; height: 45px; background: var(--gray); z-index: 4; }
+    .second-hand { width: 2px; height: 50px; background: var(--danger); z-index: 5; transition: none; }
+    .center-dot { position: absolute; width: 8px; height: 8px; background: var(--danger); border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; }
+    .digital-time { font-size: 24px; font-weight: 800; color: var(--dark); font-family: monospace; letter-spacing: 1px; }
+    .digital-date { font-size: 12px; color: var(--gray); margin-top: 4px; text-align: center; }
 
-    .breadcrumb { background: white; padding: 12px 18px; border-radius: 10px; margin-bottom: 20px; font-size: 13px; color: #666; box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .breadcrumb a { color: #667eea; text-decoration: none; cursor: pointer; font-weight: 500; }
-    .breadcrumb a:hover { text-decoration: underline; }
-    .breadcrumb .sep { color: #ccc; }
-    .breadcrumb .current { color: #2c3e50; font-weight: 600; }
+    /* INFO PANEL (KANAN) */
+    .info-panel {
+      background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);
+      padding: 20px; border-radius: 20px; display: flex; flex-direction: column; justify-content: space-between;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: relative; overflow: hidden;
+    }
+    .kitchen-info h2 { font-size: 18px; color: var(--primary); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+    .kitchen-info p { font-size: 13px; color: var(--gray); line-height: 1.5; }
+    .map-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--primary); color: white; padding: 8px 16px;
+      border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 600;
+      margin-top: 10px; transition: all 0.2s;
+    }
+    .map-link:hover { background: #0f766e; transform: translateY(-2px); }
+    
+    /* QUOTE DARK JOKE */
+    .quote-box {
+      background: var(--dark); color: white; padding: 12px 16px;
+      border-radius: 10px; margin-top: 12px; position: relative;
+      border-left: 4px solid var(--accent);
+    }
+    .quote-text { font-size: 13px; font-style: italic; opacity: 0.9; }
+    .quote-author { font-size: 11px; opacity: 0.6; margin-top: 4px; text-align: right; }
 
-    .summary-total { background: white; padding: 25px; border-radius: 14px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 25px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; cursor: pointer; transition: transform 0.2s; }
-    .summary-total:hover { transform: translateY(-2px); }
-    .total-item { text-align: center; }
-    .total-item .label { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
-    .total-item .value { font-size: 22px; font-weight: bold; color: #2c3e50; }
-    .total-item.nominal .value { color: #27ae60; }
+    /* MASCOT AHLI GIZI (SVG) */
+    .nutritionist-mascot {
+      position: absolute; right: -10px; bottom: -10px; width: 140px; height: 160px;
+      pointer-events: none; z-index: 2; transition: transform 0.3s ease;
+    }
+    .nutritionist-mascot svg { width: 100%; height: 100%; overflow: visible; }
+    .nutri-arm { transform-origin: 70px 90px; transition: transform 0.3s ease; }
+    .nutri-eyes { transform-origin: center; animation: blink 4s infinite; }
+    @keyframes blink { 0%, 96%, 100% { transform: scaleY(1); } 98% { transform: scaleY(0.1); } }
 
-    .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
-    .period-card, .school-card { background: white; border-radius: 14px; padding: 22px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); cursor: pointer; transition: all 0.3s ease; position: relative; overflow: hidden; }
-    .period-card { border-left: 5px solid #667eea; }
-    .school-card { border-left: 4px solid #764ba2; padding: 18px; }
-    .period-card:hover, .school-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
-    .period-card .period-icon { font-size: 32px; margin-bottom: 10px; }
-    .period-card h3, .school-card h4 { color: #2c3e50; margin-bottom: 12px; }
-    .school-card h4 { font-size: 15px; margin-bottom: 8px; }
-    .period-card .meta, .school-card .info { display: flex; justify-content: space-between; font-size: 12px; color: #888; margin-bottom: 8px; align-items: center; }
-    .period-card .total-nominal { font-size: 16px; font-weight: bold; color: #27ae60; padding-top: 12px; border-top: 1px dashed #eee; }
-    .school-card .nominal { font-weight: bold; color: #27ae60; font-size: 14px; }
-    .period-card .arrow { position: absolute; right: 15px; bottom: 15px; color: #667eea; font-size: 20px; font-weight: bold; }
+    /* STICKMAN NAVIGATOR (Duduk di Menu) */
+    .stickman-nav {
+      position: absolute; top: -35px; left: 50%; transform: translateX(-50%);
+      width: 40px; height: 40px; z-index: 10; pointer-events: none;
+      transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    }
+    .stickman-nav svg { width: 100%; height: 100%; overflow: visible; }
+    .stickman-nav.sitting .legs { transform: rotate(-20deg); transform-origin: top center; }
+    .stickman-nav.walking { animation: bounce 0.4s infinite alternate; }
+    @keyframes bounce { from { transform: translateX(-50%) translateY(0); } to { transform: translateX(-50%) translateY(-5px); } }
 
-    .back-btn { background: white; color: #667eea; border: none; padding: 10px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; margin-bottom: 18px; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    .back-btn:hover { background: #f0f0f0; }
+    /* SEARCH BAR */
+    .search-container { margin-bottom: 20px; position: relative; }
+    .search-input {
+      width: 100%; padding: 14px 20px 14px 45px; border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 12px; font-size: 15px; background: rgba(255,255,255,0.95);
+      outline: none; transition: all 0.2s;
+    }
+    .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(180,83,9,0.2); }
+    .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--gray); }
 
-    .detail-header { background: white; padding: 22px 25px; border-radius: 12px 12px 0 0; border-left: 6px solid #667eea; }
-    .detail-header h2 { color: #2c3e50; font-size: 20px; }
-    .detail-header p { color: #888; font-size: 13px; margin-top: 4px; }
-    .detail-wrapper { background: white; border-radius: 0 0 12px 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); display: grid; grid-template-columns: 1fr 1.2fr; overflow: hidden; }
-    .detail-left { padding: 25px; border-right: 1px solid #eee; }
-    .detail-row { display: flex; justify-content: space-between; padding: 13px 0; border-bottom: 1px dashed #e0e0e0; align-items: center; }
-    .detail-row:last-child { border-bottom: none; }
-    .detail-label { color: #888; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
-    .detail-value { color: #2c3e50; font-size: 15px; font-weight: 600; text-align: right; word-break: break-word; }
-    .detail-value.nominal { color: #27ae60; font-size: 18px; }
-    .detail-right { padding: 20px; background: #f8f9fa; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 300px; }
-    .detail-right h4 { color: #555; font-size: 13px; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
-    .bukti-img { max-width: 100%; height: auto; max-height: 600px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: zoom-in; transition: transform 0.2s; }
-    .bukti-img:hover { transform: scale(1.02); }
-    .no-image { padding: 40px; background: #eee; border-radius: 8px; color: #888; text-align: center; }
+    /* CARDS & GRID */
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .menu-card {
+      background: var(--white); border-radius: 16px; padding: 24px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08); cursor: pointer;
+      transition: all 0.3s ease; position: relative; overflow: visible;
+      border-left: 5px solid var(--primary);
+    }
+    .menu-card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.12); border-left-color: var(--accent); }
+    .menu-card h3 { font-size: 18px; color: var(--dark); margin-bottom: 8px; }
+    .menu-card .meta { font-size: 13px; color: var(--gray); display: flex; justify-content: space-between; }
+    .menu-card .value { font-weight: 700; color: var(--primary); font-size: 16px; margin-top: 10px; }
 
-    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); justify-content: center; align-items: center; }
-    .modal.active { display: flex; }
-    .modal img { max-width: 95%; max-height: 95vh; border-radius: 4px; }
-    .close-modal { position: absolute; top: 15px; right: 25px; color: white; font-size: 40px; cursor: pointer; background: rgba(0,0,0,0.5); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    /* GAME HUB CARD SPECIAL */
+    .game-hub-card { border-left-color: var(--accent); background: linear-gradient(135deg, #fffbeb 0%, #fff 100%); }
+    .game-hub-card h3 { color: var(--accent); }
+
+    /* DETAIL VIEW */
+    .detail-view { background: var(--white); border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+    .detail-header { padding: 24px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+    .detail-content { display: grid; grid-template-columns: 1fr 1.2fr; }
+    .detail-info { padding: 24px; }
+    .detail-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dashed #e2e8f0; }
+    .detail-label { color: var(--gray); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .detail-value { font-weight: 600; color: var(--dark); text-align: right; }
+    .detail-image { padding: 24px; background: var(--light); display: flex; align-items: center; justify-content: center; min-height: 300px; }
+    .detail-image img { max-width: 100%; max-height: 500px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); cursor: zoom-in; }
+    .back-btn {
+      background: var(--white); color: var(--primary); border: 2px solid var(--primary);
+      padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 6px; margin-bottom: 16px;
+    }
+    .back-btn:hover { background: var(--primary); color: white; }
+
+    /* MINI GAMES MODAL */
+    .game-modal {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9);
+      z-index: 1000; justify-content: center; align-items: center; padding: 20px;
+    }
+    .game-modal.active { display: flex; }
+    .game-container {
+      background: var(--white); border-radius: 20px; padding: 24px;
+      max-width: 400px; width: 100%; max-height: 90vh; overflow-y: auto;
+      position: relative;
+    }
+    .game-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+    .game-tab {
+      flex: 1; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px;
+      background: none; font-weight: 600; cursor: pointer; text-align: center;
+      font-size: 13px; color: var(--gray); transition: all 0.2s;
+    }
+    .game-tab.active { border-color: var(--accent); background: #fffbeb; color: var(--accent); }
+    canvas { width: 100%; aspect-ratio: 3/4; background: linear-gradient(180deg, #ecfdf5 0%, #d1fae5 100%); border-radius: 12px; touch-action: none; }
+    .guess-game { text-align: center; padding: 20px 0; }
+    .guess-input { width: 100px; padding: 10px; font-size: 20px; text-align: center; border: 2px solid #e2e8f0; border-radius: 8px; margin: 10px 0; }
+    .guess-feedback { min-height: 24px; font-weight: 600; margin: 10px 0; }
+
+    /* LOADING SKELETON */
+    .skeleton { background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
     .hidden { display: none !important; }
-    .loading { text-align: center; padding: 40px; background: white; border-radius: 12px; font-size: 16px; color: #666; }
 
-    .game-modal { display: none; position: fixed; z-index: 2000; inset: 0; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; padding: 20px; }
-    .game-modal.active { display: flex; }
-    .game-container { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); border-radius: 20px; padding: 25px; max-width: 400px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.5); position: relative; }
-    .game-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; color: white; }
-    .game-title { font-size: 18px; font-weight: 800; }
-    .game-stats { display: flex; gap: 12px; font-size: 13px; }
-    .stat-item { background: rgba(255,255,255,0.15); padding: 5px 10px; border-radius: 8px; font-weight: 600; }
-    #gameCanvas { width: 100%; aspect-ratio: 3/4; max-height: 450px; background: linear-gradient(180deg, #87CEEB 0%, #E0F6FF 100%); border-radius: 12px; display: block; touch-action: none; box-shadow: inset 0 4px 12px rgba(0,0,0,0.1); }
-    .game-controls { margin-top: 15px; display: flex; gap: 10px; justify-content: center; }
-    .game-btn-ctrl { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 14px; box-shadow: 0 4px 12px rgba(245,87,108,0.4); }
-    .game-btn-ctrl.secondary { background: rgba(255,255,255,0.2); box-shadow: none; }
-    .game-close { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.3); color: white; width: 32px; height: 32px; border-radius: 50%; border: none; font-size: 20px; cursor: pointer; }
-    .game-over { position: absolute; inset: 25px; background: rgba(0,0,0,0.85); border-radius: 12px; display: none; justify-content: center; align-items: center; flex-direction: column; color: white; text-align: center; padding: 20px; }
-    .game-over.active { display: flex; }
-    .game-over h2 { font-size: 26px; margin-bottom: 10px; color: #f5576c; }
-    .game-over p { font-size: 15px; margin-bottom: 15px; }
-    .high-score { color: #ffd700; font-size: 14px; margin-bottom: 15px; }
-    .confetti { position: fixed; width: 10px; height: 10px; top: -10px; z-index: 999; pointer-events: none; }
-
-    .stickman-mascot { position: fixed; bottom: 15px; right: 15px; width: 90px; height: 120px; z-index: 500; pointer-events: none; transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55), opacity 0.4s; }
-    .stickman-mascot.enter { animation: mascot-enter 0.7s cubic-bezier(0.68, -0.55, 0.27, 1.55); }
-    .stickman-mascot.exit { animation: mascot-exit 0.5s ease-in forwards; }
-    .stickman-mascot svg { width: 100%; height: 100%; overflow: visible; }
-    .stickman-mascot.idle .head-group { animation: head-nod 4s ease-in-out infinite; transform-origin: center bottom; }
-    .stickman-mascot.idle .eye { animation: eye-blink-slow 5s ease-in-out infinite; transform-origin: center; }
-    .stickman-mascot.idle .mouth { animation: yawn 7s ease-in-out infinite; transform-origin: center; }
-    .stickman-mascot.idle .zzz { animation: zzz-float 2s ease-in-out infinite; opacity: 1; }
-    .stickman-mascot.idle .arm-left { animation: arm-swing-idle 3s ease-in-out infinite; transform-origin: top center; }
-    .stickman-mascot.idle .arm-right { animation: arm-swing-idle 3s ease-in-out infinite 1.5s; transform-origin: top center; }
-    .stickman-mascot.loading .leg-left { animation: leg-run 0.4s linear infinite; transform-origin: top center; }
-    .stickman-mascot.loading .leg-right { animation: leg-run 0.4s linear infinite 0.2s; transform-origin: top center; }
-    .stickman-mascot.loading .arm-left { animation: arm-run 0.4s linear infinite; transform-origin: top center; }
-    .stickman-mascot.loading .arm-right { animation: arm-run 0.4s linear infinite 0.2s; transform-origin: top center; }
-    .stickman-mascot.loading .sweat { animation: sweat-drop 1s ease-in infinite; }
-    .stickman-mascot.loading .zzz { opacity: 0; }
-    .stickman-mascot.loading .body { animation: body-bounce 0.4s linear infinite; }
-    .stickman-loader { display: flex; flex-direction: column; align-items: center; gap: 15px; padding: 30px; }
-    .stickman-loader svg { width: 100px; height: 130px; }
-    .stickman-loader .leg-left { animation: leg-run 0.4s linear infinite; transform-origin: top center; }
-    .stickman-loader .leg-right { animation: leg-run 0.4s linear infinite 0.2s; transform-origin: top center; }
-    .stickman-loader .arm-left { animation: arm-run 0.4s linear infinite; transform-origin: top center; }
-    .stickman-loader .arm-right { animation: arm-run 0.4s linear infinite 0.2s; transform-origin: top center; }
-    .stickman-loader .body { animation: body-bounce 0.4s linear infinite; }
-    .stickman-loader .sweat { animation: sweat-drop 1s ease-in infinite; }
-    .stickman-loader .loader-text { font-size: 13px; color: #667eea; font-weight: 600; animation: text-pulse 1.5s ease-in-out infinite; }
-
-    @keyframes mascot-enter { 0% { transform: translateX(200%) rotate(360deg) scale(0.5); opacity: 0; } 60% { transform: translateX(-20%) rotate(-10deg) scale(1.1); opacity: 1; } 100% { transform: translateX(0) rotate(0) scale(1); opacity: 1; } }
-    @keyframes mascot-exit { 0% { transform: translateX(0) scale(1); opacity: 1; } 100% { transform: translateX(200%) scale(0.5); opacity: 0; } }
-    @keyframes head-nod { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(4px) rotate(-5deg); } }
-    @keyframes eye-blink-slow { 0%, 35%, 65%, 100% { transform: scaleY(0.1); } 40%, 60% { transform: scaleY(0.1); } 45%, 55% { transform: scaleY(1); } }
-    @keyframes yawn { 0%, 100% { transform: scaleY(1) scaleX(1); } 20%, 30% { transform: scaleY(2) scaleX(1.3); } }
-    @keyframes zzz-float { 0%, 100% { transform: translateY(0) scale(1); opacity: 0.7; } 50% { transform: translateY(-8px) scale(1.2); opacity: 1; } }
-    @keyframes arm-swing-idle { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
-    @keyframes leg-run { 0%, 100% { transform: rotate(-25deg); } 50% { transform: rotate(25deg); } }
-    @keyframes arm-run { 0%, 100% { transform: rotate(25deg); } 50% { transform: rotate(-25deg); } }
-    @keyframes body-bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
-    @keyframes sweat-drop { 0% { transform: translateY(0) scale(0.8); opacity: 1; } 100% { transform: translateY(25px) scale(1.2); opacity: 0; } }
-    @keyframes text-pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
-
+    /* RESPONSIVE MOBILE */
     @media (max-width: 768px) {
-      body { padding: 12px; padding-bottom: 160px; font-size: 16px; }
-      .app-header { padding: 20px; margin-bottom: 15px; border-radius: 20px; }
-      .app-header h1 { font-size: 22px; line-height: 1.3; }
-      .app-header p { font-size: 14px; }
-      .game-btn { top: 12px; right: 12px; font-size: 13px; padding: 8px 14px; }
-      .quote-box { padding: 18px; min-height: 75px; margin-bottom: 18px; border-radius: 16px; }
-      .quote-text { font-size: 15px; line-height: 1.5; }
-      .quote-author { font-size: 13px; margin-top: 6px; }
-      .clock-widget { flex-direction: column; gap: 18px; padding: 25px; border-radius: 24px; width: 100%; margin-bottom: 25px; }
-      .analog-clock { width: 150px; height: 150px; border-width: 5px; }
-      .analog-clock .tick { font-size: 16px; font-weight: 900; }
-      .hour-hand { width: 6px; height: 40px; }
-      .minute-hand { width: 4px; height: 55px; }
-      .second-hand { width: 2px; height: 60px; }
-      .center-dot { width: 14px; height: 14px; }
-      .digital-info { text-align: center; }
-      .digital-time { font-size: 40px; letter-spacing: 2px; }
-      .digital-zone { font-size: 18px; margin-left: 8px; }
-      .digital-date { font-size: 16px; margin-top: 8px; font-weight: 600; }
-      .breadcrumb { padding: 14px 18px; font-size: 14px; margin-bottom: 18px; }
-      .back-btn { padding: 16px 22px; font-size: 16px; margin-bottom: 18px; width: 100%; justify-content: center; border-radius: 12px; }
-      .summary-total { grid-template-columns: 1fr; gap: 18px; padding: 24px; margin-bottom: 25px; border-radius: 18px; }
-      .total-item .label { font-size: 14px; margin-bottom: 8px; }
-      .total-item .value { font-size: 28px; }
-      .total-item.nominal .value { font-size: 30px; }
-      h2[style*="color:white"] { font-size: 20px !important; margin-bottom: 18px !important; }
-      .card-grid { gap: 14px; }
-      .period-card, .school-card { padding: 22px; border-radius: 18px; }
-      .period-card h3 { font-size: 19px; margin-bottom: 12px; line-height: 1.3; }
-      .school-card h4 { font-size: 18px; margin-bottom: 12px; line-height: 1.3; }
-      .period-card .meta, .school-card .info { font-size: 15px; margin-bottom: 12px; }
-      .period-card .total-nominal { font-size: 20px; padding-top: 14px; }
-      .school-card .nominal { font-size: 17px; }
-      .period-card .period-icon { font-size: 38px; margin-bottom: 12px; }
-      .detail-header { padding: 22px; border-radius: 16px 16px 0 0; }
-      .detail-header h2 { font-size: 22px; line-height: 1.3; }
-      .detail-header p { font-size: 14px; margin-top: 6px; }
-      .detail-wrapper { grid-template-columns: 1fr; border-radius: 0 0 16px 16px; }
-      .detail-left { border-right: none; border-bottom: 1px solid #eee; padding: 22px; }
-      .detail-row { flex-direction: column; align-items: flex-start; gap: 6px; padding: 18px 0; }
-      .detail-label { font-size: 13px; letter-spacing: 0.8px; }
-      .detail-value { text-align: left; font-size: 18px; line-height: 1.4; }
-      .detail-value.nominal { font-size: 26px; }
-      .detail-right { padding: 22px; min-height: 350px; }
-      .detail-right h4 { font-size: 15px; margin-bottom: 15px; letter-spacing: 1.2px; }
-      .bukti-img { max-height: 700px; border-radius: 12px; }
-      .stickman-mascot { width: 95px; height: 125px; bottom: 18px; right: 18px; }
-      .stickman-loader svg { width: 110px; height: 140px; }
-      .stickman-loader .loader-text { font-size: 15px; }
-      .game-container { padding: 22px; max-width: 95%; border-radius: 24px; }
-      .game-title { font-size: 20px; }
-      .game-stats { font-size: 15px; gap: 10px; }
-      .stat-item { padding: 8px 14px; border-radius: 10px; }
-      .game-controls { flex-direction: column; gap: 12px; margin-top: 18px; }
-      .game-btn-ctrl { padding: 16px 24px; font-size: 17px; width: 100%; border-radius: 14px; }
-      .game-close { width: 40px; height: 40px; font-size: 24px; }
-      .game-over h2 { font-size: 30px; }
-      .game-over p { font-size: 18px; margin-bottom: 18px; }
-      .high-score { font-size: 16px; margin-bottom: 20px; }
-      .close-modal { width: 55px; height: 55px; font-size: 45px; top: 20px; right: 20px; }
+      body { padding: 12px; padding-bottom: 100px; }
+      .top-dashboard { grid-template-columns: 1fr; gap: 12px; }
+      .clock-panel { flex-direction: row; gap: 15px; padding: 15px; min-width: unset; }
+      .analog-clock { width: 80px; height: 80px; margin-bottom: 0; }
+      .hour-hand { height: 20px; } .minute-hand { height: 30px; } .second-hand { height: 35px; }
+      .digital-time { font-size: 20px; }
+      .nutritionist-mascot { width: 100px; height: 120px; right: -5px; bottom: -5px; }
+      .detail-content { grid-template-columns: 1fr; }
+      .detail-image { min-height: 250px; }
+      .menu-card { padding: 18px; }
+      .menu-card h3 { font-size: 16px; }
+      .stickman-nav { width: 30px; height: 30px; top: -28px; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="app-header">
-      <h1>💰 SUMMARY INSENTIF PIC</h1>
-      <p>Sistem Rekapitulasi Bukti Transfer Sekolah</p>
-      <button class="game-btn" onclick="openGame()">🎮 Mini Game</button>
-    </div>
-    <div class="quote-box" id="quoteBox">
-      <div class="quote-text" id="quoteText">Memuat inspirasi...</div>
-      <div class="quote-author" id="quoteAuthor"></div>
-    </div>
-    <div class="clock-widget">
+
+<div class="container">
+  <!-- TOP DASHBOARD: JAM KIRI + INFO KANAN -->
+  <div class="top-dashboard">
+    <!-- JAM (KIRI) -->
+    <div class="clock-panel">
       <div class="analog-clock">
-        <span class="tick t12">12</span><span class="tick t3">3</span><span class="tick t6">6</span><span class="tick t9">9</span>
         <div class="hand hour-hand" id="hourHand"></div>
         <div class="hand minute-hand" id="minuteHand"></div>
         <div class="hand second-hand" id="secondHand"></div>
         <div class="center-dot"></div>
       </div>
-      <div class="digital-info">
-        <div><span class="digital-time" id="digitalTime">00:00:00</span><span class="digital-zone">WIB</span></div>
-        <div class="digital-date" id="digitalDate">Memuat tanggal...</div>
+      <div>
+        <div class="digital-time" id="digitalTime">00:00:00</div>
+        <div class="digital-date" id="digitalDate">Memuat...</div>
       </div>
     </div>
-    <div id="viewSummary">
-      <div id="summaryTotal" class="summary-total" onclick="triggerConfetti()"></div>
-      <h2 style="color:white; font-size:18px; margin-bottom:15px; text-align:center;">📅 Pilih Periode</h2>
-      <div id="periodList" class="card-grid"><div class="loading">⏳ Memuat data periode...</div></div>
+
+    <!-- INFO PANEL (KANAN) -->
+    <div class="info-panel">
+      <div class="kitchen-info">
+        <h2>🍳 Dapur Gizi Operasional</h2>
+        <p>Pusat produksi & distribusi insentif gizi sekolah. Pastikan semua bukti transfer terverifikasi sebelum periode ditutup.</p>
+        <a href="https://maps.app.goo.gl/bysA7S7JaHnVTPXx7" target="_blank" class="map-link">
+          📍 Buka Lokasi Dapur di Maps
+        </a>
+      </div>
+      <div class="quote-box">
+        <div class="quote-text" id="quoteText">"Loading dark jokes..."</div>
+        <div class="quote-author" id="quoteAuthor"></div>
+      </div>
+      
+      <!-- MASCOT AHLI GIZI -->
+      <div class="nutritionist-mascot" id="nutriMascot">
+        <svg viewBox="0 0 120 150" xmlns="http://www.w3.org/2000/svg">
+          <!-- Badan -->
+          <rect x="35" y="60" width="50" height="70" rx="10" fill="#0d9488"/>
+          <!-- Kepala -->
+          <circle cx="60" cy="40" r="25" fill="#FFE0B2"/>
+          <!-- Topi Chef/Gizi -->
+          <path d="M35 30 Q60 5 85 30 L85 35 L35 35 Z" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+          <rect x="35" y="32" width="50" height="8" rx="2" fill="white"/>
+          <!-- Mata -->
+          <g class="nutri-eyes">
+            <circle cx="50" cy="40" r="3" fill="#1e293b"/>
+            <circle cx="70" cy="40" r="3" fill="#1e293b"/>
+          </g>
+          <!-- Senyum -->
+          <path d="M50 50 Q60 58 70 50" stroke="#1e293b" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <!-- Tangan Kiri (Pegang Clipboard) -->
+          <g class="nutri-arm" id="nutriArmLeft">
+            <rect x="15" y="70" width="20" height="8" rx="4" fill="#FFE0B2"/>
+            <rect x="10" y="65" width="15" height="25" rx="2" fill="#b45309"/>
+            <rect x="12" y="68" width="11" height="18" rx="1" fill="white"/>
+          </g>
+          <!-- Tangan Kanan -->
+          <g class="nutri-arm" id="nutriArmRight" style="transform-origin: 85px 75px;">
+            <rect x="85" y="70" width="20" height="8" rx="4" fill="#FFE0B2"/>
+          </g>
+          <!-- Badge -->
+          <circle cx="75" cy="80" r="6" fill="#b45309"/>
+          <text x="75" y="83" font-size="8" fill="white" text-anchor="middle" font-weight="bold">G</text>
+        </svg>
+      </div>
     </div>
-    <div id="viewPeriod" class="hidden">
-      <div id="breadcrumbPeriod" class="breadcrumb"></div>
-      <button class="back-btn" onclick="showSummary()">← Kembali ke Summary</button>
-      <div id="periodHeader" class="detail-header" style="margin-bottom:15px;"></div>
-      <div id="schoolList" class="card-grid"></div>
+  </div>
+
+  <!-- SEARCH BAR -->
+  <div class="search-container">
+    <span class="search-icon">🔍</span>
+    <input type="text" class="search-input" id="searchInput" placeholder="Cari sekolah, PIC, atau nominal...">
+  </div>
+
+  <!-- VIEW: SUMMARY / MENU UTAMA -->
+  <div id="viewSummary">
+    <div class="card-grid" id="menuGrid">
+      <div class="skeleton" style="height:120px"></div>
+      <div class="skeleton" style="height:120px"></div>
+      <div class="skeleton" style="height:120px"></div>
     </div>
-    <div id="viewDetail" class="hidden">
-      <div id="breadcrumbDetail" class="breadcrumb"></div>
-      <button class="back-btn" onclick="showPeriod(currentPeriodIdx)">← Kembali ke Daftar Sekolah</button>
-      <div class="detail-header"><h2 id="detailSekolah">Nama Sekolah</h2><p id="detailNo">No. Urut</p></div>
-      <div class="detail-wrapper">
-        <div class="detail-left">
-          <div class="detail-row"><span class="detail-label">👤 PIC</span><span class="detail-value" id="detailPIC">-</span></div>
-          <div class="detail-row"><span class="detail-label">🏦 Bank / E-Wallet</span><span class="detail-value" id="detailBank">-</span></div>
-          <div class="detail-row"><span class="detail-label">💳 No. Rekening / HP</span><span class="detail-value" id="detailRek">-</span></div>
-          <div class="detail-row"><span class="detail-label">💰 Nominal Transfer</span><span class="detail-value nominal" id="detailNom">-</span></div>
+  </div>
+
+  <!-- VIEW: DETAIL SEKOLAH -->
+  <div id="viewDetail" class="hidden">
+    <button class="back-btn" onclick="navigateTo('summary')">← Kembali</button>
+    <div class="detail-view">
+      <div class="detail-header">
+        <h2 id="detailTitle" style="font-size:20px; color:var(--dark);">Detail Sekolah</h2>
+        <span id="detailBadge" style="background:var(--primary); color:white; padding:4px 12px; border-radius:20px; font-size:12px; font-weight:600;">Periode</span>
+      </div>
+      <div class="detail-content">
+        <div class="detail-info">
+          <div class="detail-row"><span class="detail-label">PIC</span><span class="detail-value" id="dPIC">-</span></div>
+          <div class="detail-row"><span class="detail-label">Bank/E-Wallet</span><span class="detail-value" id="dBank">-</span></div>
+          <div class="detail-row"><span class="detail-label">No. Rekening</span><span class="detail-value" id="dRek">-</span></div>
+          <div class="detail-row"><span class="detail-label">Nominal</span><span class="detail-value" id="dNom" style="color:var(--primary); font-size:18px;">-</span></div>
+          <div class="detail-row"><span class="detail-label">Status</span><span class="detail-value" style="color:#059669;">✅ Terverifikasi</span></div>
         </div>
-        <div class="detail-right"><h4>📷 Bukti Transfer</h4><div id="imgContainer"></div></div>
+        <div class="detail-image" id="dImgContainer">
+          <div class="skeleton" style="width:100%; height:200px;"></div>
+        </div>
       </div>
     </div>
   </div>
-  <div id="zoomModal" class="modal" onclick="closeZoom()"><span class="close-modal">&times;</span><img id="zoomImg" src=""></div>
+</div>
 
-  <div id="gameModal" class="game-modal">
-    <div class="game-container">
-      <button class="game-close" onclick="closeGame()">×</button>
-      <div class="game-header"><div class="game-title">🪙 Tangkap Koin</div><div class="game-stats"><div class="stat-item">💰 <span id="gameScore">0</span></div><div class="stat-item">❤️ <span id="gameLives">3</span></div></div></div>
-      <canvas id="gameCanvas" width="360" height="480"></canvas>
-      <div class="game-controls"><button class="game-btn-ctrl" onclick="startGame()">▶ Mulai</button><button class="game-btn-ctrl secondary" onclick="closeGame()">Tutup</button></div>
-      <div class="game-over" id="gameOver"><h2>GAME OVER!</h2><p>Skor: <strong id="finalScore">0</strong></p><div class="high-score">🏆 Tertinggi: <span id="highScore">0</span></div><button class="game-btn-ctrl" onclick="startGame()">🔄 Main Lagi</button></div>
+<!-- GAME MODAL -->
+<div class="game-modal" id="gameModal">
+  <div class="game-container">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+      <h3 style="color:var(--accent);">🎮 Mini Game Dapur</h3>
+      <button onclick="closeGame()" style="background:none; border:none; font-size:24px; cursor:pointer;">×</button>
+    </div>
+    <div class="game-tabs">
+      <button class="game-tab active" onclick="switchGame('coin')">🪙 Tangkap Koin</button>
+      <button class="game-tab" onclick="switchGame('guess')">🔢 Tebak Kalori</button>
+    </div>
+    
+    <!-- Game 1: Tangkap Koin -->
+    <div id="gameCoin">
+      <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-weight:600; color:var(--dark);">
+        <span>Skor: <span id="coinScore">0</span></span>
+        <span>Nyawa: <span id="coinLives">3</span></span>
+      </div>
+      <canvas id="coinCanvas" width="360" height="480"></canvas>
+      <button onclick="startCoinGame()" id="coinStartBtn" style="width:100%; padding:12px; background:var(--accent); color:white; border:none; border-radius:8px; font-weight:700; margin-top:10px; cursor:pointer;">▶ Mulai Tangkap</button>
+    </div>
+
+    <!-- Game 2: Tebak Kalori -->
+    <div id="gameGuess" class="hidden guess-game">
+      <p style="font-size:14px; color:var(--gray); margin-bottom:10px;">Tebak jumlah kalori makanan ini!</p>
+      <div style="font-size:60px; margin:10px 0;" id="guessEmoji">🍛</div>
+      <div style="font-weight:700; font-size:18px; margin-bottom:10px;" id="guessFoodName">Nasi Goreng</div>
+      <input type="number" class="guess-input" id="guessInput" placeholder="???">
+      <button onclick="checkGuess()" style="padding:10px 24px; background:var(--primary); color:white; border:none; border-radius:8px; font-weight:600; cursor:pointer;">Tebak!</button>
+      <div class="guess-feedback" id="guessFeedback"></div>
+      <div style="font-size:12px; color:var(--gray); margin-top:10px;">Streak: <span id="guessStreak">0</span> 🔥</div>
     </div>
   </div>
+</div>
 
-  <div class="stickman-mascot idle" id="stickmanMascot">
-    <svg viewBox="0 0 100 130" xmlns="http://www.w3.org/2000/svg">
-      <g class="zzz"><text x="72" y="25" font-size="14" font-weight="bold" fill="#667eea">Z</text><text x="80" y="15" font-size="10" font-weight="bold" fill="#667eea">z</text><text x="86" y="8" font-size="7" font-weight="bold" fill="#667eea">z</text></g>
-      <circle class="sweat" cx="62" cy="30" r="3" fill="#4FC3F7" style="opacity:0"/>
-      <g class="body">
-        <g class="head-group"><circle class="head" cx="50" cy="30" r="14" fill="#FFE0B2" stroke="#333" stroke-width="2"/><ellipse class="eye" cx="44" cy="30" rx="2" ry="1" fill="#333"/><ellipse class="eye" cx="56" cy="30" rx="2" ry="1" fill="#333"/><ellipse class="mouth" cx="50" cy="37" rx="3" ry="2" fill="#333"/><path d="M 38 22 Q 50 15 62 22" stroke="#333" stroke-width="2" fill="none"/></g>
-        <line x1="50" y1="44" x2="50" y2="80" stroke="#333" stroke-width="3" stroke-linecap="round"/>
-        <g class="arm-left"><line x1="50" y1="52" x2="35" y2="72" stroke="#333" stroke-width="3" stroke-linecap="round"/></g>
-        <g class="arm-right"><line x1="50" y1="52" x2="65" y2="72" stroke="#333" stroke-width="3" stroke-linecap="round"/></g>
-        <g class="leg-left"><line x1="50" y1="80" x2="38" y2="105" stroke="#333" stroke-width="3" stroke-linecap="round"/></g>
-        <g class="leg-right"><line x1="50" y1="80" x2="62" y2="105" stroke="#333" stroke-width="3" stroke-linecap="round"/></g>
-      </g>
-    </svg>
-  </div>
+<!-- STICKMAN NAVIGATOR (Posisi absolut, dipindah via JS) -->
+<div class="stickman-nav sitting" id="stickmanNav">
+  <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="20" cy="10" r="6" fill="#1e293b"/>
+    <line x1="20" y1="16" x2="20" y2="28" stroke="#1e293b" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="20" y1="20" x2="12" y2="26" stroke="#1e293b" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="20" y1="20" x2="28" y2="26" stroke="#1e293b" stroke-width="2.5" stroke-linecap="round"/>
+    <g class="legs">
+      <line x1="20" y1="28" x2="14" y2="38" stroke="#1e293b" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="20" y1="28" x2="26" y2="38" stroke="#1e293b" stroke-width="2.5" stroke-linecap="round"/>
+    </g>
+  </svg>
+</div>
 
-  <script>
-    var appData = null, currentPeriodIdx = 0, idleTimer = null;
+<script>
+  // === KONFIGURASI API ===
+  const URL_API = "PASTE_URL_EXEC_APPS_SCRIPT_ANDA_DISINI"; // ⚠️ GANTI INI!
 
-    // ⚠️ GANTI DENGAN URL /exec DARI APPS SCRIPT ANDA
-    const URL_API = "https://script.google.com/macros/s/AKfycbxH3ZuUkKe2O_meGKp96gPMtU68fbWaXNeHl77Z27JGLBtMmctv-Y_bQl7EEpK6ChtmvQ/exec";
+  // === DATA & STATE ===
+  let appData = null;
+  let currentView = 'summary';
+  let searchTimeout = null;
 
-    function formatRupiah(angka) {
-      let clean = String(angka).replace(/[^0-9]/g, '');
-      if (!clean) return "Rp 0";
-      return 'Rp ' + parseInt(clean, 10).toLocaleString('id-ID');
+  // === DARK JOKES & HUMOR GIZI ===
+  const quotes = [
+    { t: "Insentif cair H+1, tapi motivasi cairnya H+never.", a: "— PIC Lelah" },
+    { t: "Gizi seimbang itu penting. Seimbang antara masuk dapur dan masuk RS.", a: "— Ahli Gizi Realistis" },
+    { t: "Bukti transfer blur? Sama kayak masa depan anggaran dapur.", a: "— Admin Keuangan" },
+    { t: "Anak-anak butuh protein. Staff butuh kepastian. Dua-duanya sering telat.", a: "— Dark Kitchen" },
+    { t: "Menu hari ini: Nasi, sayur, dan harapan palsu bahwa lembur dibayar.", a: "— Chef Putus Asa" },
+    { t: "Kalori terbakar bukan dari masak, tapi dari lari ngejar deadline laporan.", a: "— Fitness Dapur" },
+    { t: "Transfer berhasil ≠ Transfer sampai. Bedanya setipis kesabaran PIC.", a: "— Bank Error" },
+    { t: "Standar gizi nasional naik. Standar kewarasan staff turun.", a: "— Statistik Gelap" },
+    { t: "Dapur bersih, hati bersih. Dompet? Itu urusan lain.", a: "— Motivasi Tipu-tipu" },
+    { t: "Setiap bukti transfer yang di-zoom berkali-kali menyimpan doa yang sama: 'Semoga jelas'.", a: "— Verifikator" },
+    { t: "Rumus gizi: Karbohidrat + Protein + Lemak. Rumus hidup: Kopi + Sabar + Insentif.", a: "— Filsuf Dapur" },
+    { t: "Kalau kamu merasa lelah, ingatlah bahwa nasi goreng juga butuh diaduk biar matang.", a: "— Wisdom Wajan" }
+  ];
+
+  // === JAM ANALOG WIB ===
+  function updateClock() {
+    const now = new Date();
+    const tf = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+    const p = tf.formatToParts(now);
+    const h = parseInt(p.find(x => x.type === 'hour').value);
+    const m = parseInt(p.find(x => x.type === 'minute').value);
+    const s = parseInt(p.find(x => x.type === 'second').value);
+    
+    document.getElementById('secondHand').style.transform = `translateX(-50%) rotate(${(s/60)*360}deg)`;
+    document.getElementById('minuteHand').style.transform = `translateX(-50%) rotate(${(m/60)*360 + (s/60)*6}deg)`;
+    document.getElementById('hourHand').style.transform = `translateX(-50%) rotate(${((h%12)/12)*360 + (m/60)*30}deg)`;
+    document.getElementById('digitalTime').innerText = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    document.getElementById('digitalDate').innerText = now.toLocaleDateString('id-ID', { weekday:'long', day:'numeric', month:'short', year:'numeric', timeZone:'Asia/Jakarta' });
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  // === QUOTE ROTATOR ===
+  let quoteIdx = Math.floor(Math.random() * quotes.length);
+  function rotateQuote() {
+    const q = quotes[quoteIdx];
+    const el = document.getElementById('quoteText');
+    el.style.opacity = '0';
+    setTimeout(() => {
+      el.innerText = `"${q.t}"`;
+      document.getElementById('quoteAuthor').innerText = q.a;
+      el.style.opacity = '1';
+    }, 300);
+    quoteIdx = (quoteIdx + 1) % quotes.length;
+  }
+  rotateQuote();
+  setInterval(rotateQuote, 10000);
+
+  // === FORMAT RUPIAH ===
+  function formatRp(val) {
+    const clean = String(val).replace(/[^0-9]/g, '');
+    if (!clean) return 'Rp 0';
+    return 'Rp ' + parseInt(clean).toLocaleString('id-ID');
+  }
+
+  // === FETCH DATA ===
+  async function loadData() {
+    try {
+      const res = await fetch(URL_API, { redirect: 'follow' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      appData = await res.json();
+      renderSummary();
+    } catch (err) {
+      document.getElementById('menuGrid').innerHTML = `
+        <div style="grid-column:1/-1; text-align:center; padding:40px; color:white;">
+          <div style="font-size:40px; margin-bottom:10px;">⚠️</div>
+          <div style="font-size:16px; font-weight:600;">Gagal memuat data</div>
+          <div style="font-size:13px; opacity:0.8; margin-top:5px;">Pastikan URL API benar & izin akses terbuka</div>
+          <div style="font-size:11px; opacity:0.6; margin-top:8px;">${err.message}</div>
+        </div>`;
+    }
+  }
+  loadData();
+
+  // === RENDER SUMMARY + GAME HUB CARD ===
+  function renderSummary(filter = '') {
+    const grid = document.getElementById('menuGrid');
+    if (!appData || !appData.periods) return;
+
+    let html = '';
+    
+    // Game Hub Card (selalu muncul pertama)
+    if (!filter) {
+      html += `
+        <div class="menu-card game-hub-card" onclick="openGame()" data-type="game">
+          <div class="stickman-sit-target"></div>
+          <h3>🎮 Mini Game Dapur</h3>
+          <div class="meta"><span>Istirahat sejenak</span><span>2 Games</span></div>
+          <div class="value" style="color:var(--accent);">Main Sekarang →</div>
+        </div>`;
     }
 
-    // === JAM ===
-    function updateClock() {
-      const now = new Date();
-      const tf = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-      const p = tf.formatToParts(now);
-      const h = parseInt(p.find(x => x.type === 'hour').value);
-      const m = parseInt(p.find(x => x.type === 'minute').value);
-      const s = parseInt(p.find(x => x.type === 'second').value);
-      document.getElementById('secondHand').style.transform = `translateX(-50%) rotate(${(s/60)*360}deg)`;
-      document.getElementById('minuteHand').style.transform = `translateX(-50%) rotate(${(m/60)*360+(s/60)*6}deg)`;
-      document.getElementById('hourHand').style.transform = `translateX(-50%) rotate(${((h%12)/12)*360+(m/60)*30}deg)`;
-      document.getElementById('digitalTime').innerText = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-      document.getElementById('digitalDate').innerText = now.toLocaleDateString('id-ID', { weekday:'long', year:'numeric', month:'long', day:'numeric', timeZone:'Asia/Jakarta' });
-    }
-    setInterval(updateClock, 1000); updateClock();
+    // Periode Cards
+    appData.periods.forEach((period, idx) => {
+      const matchFilter = !filter || 
+        period.name.toLowerCase().includes(filter) ||
+        period.schools.some(s => 
+          s.sekolah.toLowerCase().includes(filter) || 
+          s.pic.toLowerCase().includes(filter)
+        );
+      
+      if (matchFilter) {
+        html += `
+          <div class="menu-card" onclick="navigateTo('period', ${idx})" data-type="period" data-idx="${idx}">
+            <div class="stickman-sit-target"></div>
+            <h3>📅 ${period.name}</h3>
+            <div class="meta"><span>🏫 ${period.totalSekolah} Sekolah</span><span>👥 PIC</span></div>
+            <div class="value">${formatRp(period.totalNominal)}</div>
+          </div>`;
+      }
+    });
 
-    // === QUOTE ===
-    const quotes = [
-      { t: "Rezeki tidak akan tertukar, selama niat baik dan usaha keras terus berjalan.", a: "— Pepatah" },
-      { t: "Insentif terbaik adalah saat kerja kerasmu dihargai dengan senyum tulus.", a: "— Tim PIC" },
-      { t: "Jangan menunggu sempurna untuk memulai, mulailah untuk menjadi sempurna.", a: "— Mario Teguh" },
-      { t: "Setiap transfer adalah bukti amanah yang dititipkan.", a: "— Anonim" },
-      { t: "Kerja keras hari ini adalah tabungan untuk senyum esok hari.", a: "— Motivasi" },
-      { t: "Keberhasilan bukan kebetulan, tapi hasil dari konsistensi harian.", a: "— Pepatah" },
-      { t: "Jadilah PIC yang amanah, karena kepercayaan adalah mata uang termahal.", a: "— Wisdom" },
-      { t: "Senyum anak yatim adalah ROI terbaik dari setiap rupiah yang disalurkan.", a: "— Heart" },
-      { t: "Lelahmu hari ini akan menjadi cerita indah di masa depan.", a: "— Motivasi" },
-      { t: "Setiap sekolah yang kau bantu adalah investasi akhirat yang tak ternilai.", a: "— Reminder" }
-    ];
-    let quoteIdx = Math.floor(Math.random() * quotes.length);
-    function showQuote() {
-      const q = quotes[quoteIdx]; const el = document.getElementById('quoteText');
-      el.style.opacity = '0';
-      setTimeout(() => { el.innerText = `"${q.t}"`; document.getElementById('quoteAuthor').innerText = q.a; el.style.opacity = '1'; }, 300);
-      quoteIdx = (quoteIdx + 1) % quotes.length;
+    if (!html) {
+      html = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:white; font-size:15px;">Tidak ada hasil untuk "${filter}"</div>`;
     }
-    showQuote(); setInterval(showQuote, 8000);
 
-    // === CONFETTI ===
-    function triggerConfetti() {
-      const colors = ['#f5576c','#667eea','#f093fb','#ffd700','#27ae60','#f39c12'];
-      for (let i = 0; i < 60; i++) {
-        const c = document.createElement('div'); c.className = 'confetti';
-        c.style.left = Math.random()*100+'vw'; c.style.background = colors[Math.floor(Math.random()*colors.length)];
-        c.style.borderRadius = Math.random()>0.5?'50%':'0'; c.style.transform = `rotate(${Math.random()*360}deg)`;
-        document.body.appendChild(c);
-        const d = 2+Math.random()*2;
-        c.animate([{transform:`translateY(0) rotate(0deg)`,opacity:1},{transform:`translateY(100vh) rotate(${720+Math.random()*360}deg)`,opacity:0}],{duration:d*1000,easing:'cubic-bezier(0.4,0,0.7,1)'});
-        setTimeout(()=>c.remove(), d*1000);
+    grid.innerHTML = html;
+    
+    // Tempatkan stickman di kartu pertama
+    placeStickmanOnFirstCard();
+  }
+
+  // === STICKMAN NAVIGATOR LOGIC ===
+  function placeStickmanOnFirstCard() {
+    const stickman = document.getElementById('stickmanNav');
+    const firstCard = document.querySelector('.menu-card');
+    if (firstCard && currentView === 'summary') {
+      const rect = firstCard.getBoundingClientRect();
+      stickman.style.left = (rect.left + rect.width / 2) + 'px';
+      stickman.style.top = (rect.top - 35 + window.scrollY) + 'px';
+      stickman.classList.remove('walking');
+      stickman.classList.add('sitting');
+      stickman.style.display = 'block';
+    } else if (currentView !== 'summary') {
+      stickman.style.display = 'none';
+    }
+  }
+
+  function animateStickmanTo(targetEl, callback) {
+    const stickman = document.getElementById('stickmanNav');
+    stickman.classList.remove('sitting');
+    stickman.classList.add('walking');
+    
+    const rect = targetEl.getBoundingClientRect();
+    stickman.style.left = (rect.left + rect.width / 2) + 'px';
+    stickman.style.top = (rect.top - 35 + window.scrollY) + 'px';
+    
+    setTimeout(() => {
+      stickman.classList.remove('walking');
+      stickman.classList.add('sitting');
+      if (callback) callback();
+    }, 500);
+  }
+
+  // Reposition stickman on scroll/resize
+  window.addEventListener('scroll', () => { if (currentView === 'summary') placeStickmanOnFirstCard(); });
+  window.addEventListener('resize', () => { if (currentView === 'summary') placeStickmanOnFirstCard(); });
+
+  // === NAVIGATION ===
+  function navigateTo(view, param) {
+    const clickedCard = event?.currentTarget;
+    
+    if (clickedCard && view !== 'summary') {
+      animateStickmanTo(clickedCard, () => performNavigation(view, param));
+    } else {
+      performNavigation(view, param);
+    }
+  }
+
+  function performNavigation(view, param) {
+    currentView = view;
+    document.getElementById('viewSummary').classList.toggle('hidden', view !== 'summary');
+    document.getElementById('viewDetail').classList.toggle('hidden', view !== 'detail');
+    
+    if (view === 'summary') {
+      renderSummary(document.getElementById('searchInput').value.toLowerCase());
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (view === 'period') {
+      // Untuk simplicity, langsung tampilkan detail sekolah pertama di periode
+      // Atau bisa dikembangkan untuk menampilkan list sekolah dulu
+      const period = appData.periods[param];
+      if (period && period.schools.length > 0) {
+        showSchoolDetail(period, 0);
       }
     }
+    
+    // Animasi mascot ahli gizi
+    const arm = document.getElementById('nutriArmRight');
+    arm.style.transform = 'rotate(-30deg)';
+    setTimeout(() => arm.style.transform = 'rotate(0)', 300);
+  }
 
-    // === STICKMAN ===
-    function setStickmanState(state) {
-      const m = document.getElementById('stickmanMascot');
-      m.classList.remove('idle','loading','enter','exit'); m.classList.add(state);
-      if (idleTimer) clearTimeout(idleTimer);
-      if (state !== 'idle' && state !== 'exit') idleTimer = setTimeout(() => setStickmanState('idle'), 3000);
+  function showSchoolDetail(period, schoolIdx) {
+    const s = period.schools[schoolIdx];
+    document.getElementById('detailTitle').innerText = s.sekolah;
+    document.getElementById('detailBadge').innerText = period.name;
+    document.getElementById('dPIC').innerText = s.pic;
+    document.getElementById('dBank').innerText = s.bank;
+    document.getElementById('dRek').innerText = s.rekening;
+    document.getElementById('dNom').innerText = formatRp(s.nominal);
+    
+    const imgContainer = document.getElementById('dImgContainer');
+    if (s.fullUrl) {
+      imgContainer.innerHTML = `<div class="skeleton" style="width:100%;height:200px;"></div>`;
+      const img = new Image();
+      img.onload = () => { imgContainer.innerHTML = ''; imgContainer.appendChild(img); };
+      img.onerror = () => { imgContainer.innerHTML = '<div style="text-align:center;color:var(--gray);padding:20px;">❌ Gambar tidak tersedia<br><small>Cek izin akses Drive</small></div>'; };
+      img.src = s.fullUrl;
+      img.className = 'bukti-img';
+      img.onclick = () => window.open(s.fullUrl, '_blank');
+    } else {
+      imgContainer.innerHTML = '<div style="text-align:center;color:var(--gray);padding:20px;">📭 Tidak ada bukti transfer</div>';
     }
-    function animateTransition(cb) {
-      const m = document.getElementById('stickmanMascot');
-      m.classList.add('exit');
-      setTimeout(() => { m.classList.remove('exit'); if(cb) cb(); m.classList.add('enter'); setTimeout(() => { m.classList.remove('enter'); setStickmanState('idle'); }, 700); }, 500);
+    
+    currentView = 'detail';
+    document.getElementById('viewSummary').classList.add('hidden');
+    document.getElementById('viewDetail').classList.remove('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // === SEARCH ===
+  document.getElementById('searchInput').addEventListener('input', (e) => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      renderSummary(e.target.value.toLowerCase());
+    }, 300);
+  });
+
+  // === MINI GAMES ===
+  let activeGame = 'coin';
+  let coinGameRunning = false, coinScore = 0, coinLives = 3, coinItems = [], coinBasket = {x:0,y:0,w:70,h:15}, coinLoop = null, coinLastSpawn = 0;
+  let guessStreak = 0;
+  const foods = [
+    {name:'Nasi Goreng', emoji:'🍛', cal:650}, {name:'Soto Ayam', emoji:'🍲', cal:350},
+    {name:'Gado-gado', emoji:'🥗', cal:280}, {name:'Rendang', emoji:'🥩', cal:450},
+    {name:'Bakso', emoji:'🍜', cal:380}, {name:'Nasi Padang', emoji:'🍚', cal:700},
+    {name:'Sayur Lodeh', emoji:'🥘', cal:250}, {name:'Ayam Goreng', emoji:'🍗', cal:400},
+    {name:'Tempe Mendoan', emoji:'🫓', cal:200}, {name:'Es Teh Manis', emoji:'🧋', cal:150}
+  ];
+  let currentFood = foods[0];
+
+  function openGame() {
+    document.getElementById('gameModal').classList.add('active');
+    switchGame('coin');
+  }
+  function closeGame() {
+    document.getElementById('gameModal').classList.remove('active');
+    stopCoinGame();
+  }
+  function switchGame(game) {
+    activeGame = game;
+    document.querySelectorAll('.game-tab').forEach(t => t.classList.remove('active'));
+    event?.target?.classList.add('active') || document.querySelector(`.game-tab[onclick*="${game}"]`)?.classList.add('active');
+    document.getElementById('gameCoin').classList.toggle('hidden', game !== 'coin');
+    document.getElementById('gameGuess').classList.toggle('hidden', game !== 'guess');
+    if (game === 'coin') stopCoinGame();
+    if (game === 'guess') newGuessRound();
+  }
+
+  // Coin Game
+  function startCoinGame() {
+    coinScore = 0; coinLives = 3; coinItems = []; coinGameRunning = true;
+    document.getElementById('coinScore').innerText = 0;
+    document.getElementById('coinLives').innerText = 3;
+    document.getElementById('coinStartBtn').innerText = '🔄 Reset';
+    const canvas = document.getElementById('coinCanvas');
+    coinBasket.x = canvas.width/2 - coinBasket.w/2;
+    coinBasket.y = canvas.height - 40;
+    if (coinLoop) cancelAnimationFrame(coinLoop);
+    coinGameLoop();
+  }
+  function stopCoinGame() { coinGameRunning = false; if(coinLoop) cancelAnimationFrame(coinLoop); }
+  function coinGameLoop() {
+    if (!coinGameRunning) return;
+    const canvas = document.getElementById('coinCanvas');
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    
+    if (Date.now() - coinLastSpawn > 700) {
+      const isBomb = Math.random() < 0.2;
+      coinItems.push({x:Math.random()*(canvas.width-30)+15, y:-30, type:isBomb?'bomb':'coin', speed:2+Math.random()*2+coinScore*0.005, size:isBomb?25:20});
+      coinLastSpawn = Date.now();
     }
-    function resetIdleTimer() { if(idleTimer) clearTimeout(idleTimer); idleTimer = setTimeout(() => setStickmanState('idle'), 10000); }
-    ['click','scroll','mousemove','touchstart'].forEach(e => document.addEventListener(e, resetIdleTimer));
-    function getStickmanLoader() {
-      return `<div class="stickman-loader"><svg viewBox="0 0 100 130" xmlns="http://www.w3.org/2000/svg"><circle class="sweat" cx="62" cy="30" r="3" fill="#4FC3F7"/><g class="body"><g class="head-group"><circle cx="50" cy="30" r="14" fill="#FFE0B2" stroke="#333" stroke-width="2"/><circle cx="44" cy="30" r="2" fill="#333"/><circle cx="56" cy="30" r="2" fill="#333"/><path d="M 45 37 Q 50 40 55 37" stroke="#333" stroke-width="1.5" fill="none"/><path d="M 38 22 Q 50 15 62 22" stroke="#333" stroke-width="2" fill="none"/></g><line x1="50" y1="44" x2="50" y2="80" stroke="#333" stroke-width="3" stroke-linecap="round"/><g class="arm-left"><line x1="50" y1="52" x2="35" y2="72" stroke="#333" stroke-width="3" stroke-linecap="round"/></g><g class="arm-right"><line x1="50" y1="52" x2="65" y2="72" stroke="#333" stroke-width="3" stroke-linecap="round"/></g><g class="leg-left"><line x1="50" y1="80" x2="38" y2="105" stroke="#333" stroke-width="3" stroke-linecap="round"/></g><g class="leg-right"><line x1="50" y1="80" x2="62" y2="105" stroke="#333" stroke-width="3" stroke-linecap="round"/></g></g></svg><div class="loader-text">🏃 Stickman sedang mengambil bukti transfer...</div></div>`;
+    
+    coinItems = coinItems.filter(item => {
+      item.y += item.speed;
+      if (item.y+item.size > coinBasket.y && item.y < coinBasket.y+coinBasket.h && item.x > coinBasket.x && item.x < coinBasket.x+coinBasket.w) {
+        if (item.type==='coin') { coinScore+=10; document.getElementById('coinScore').innerText=coinScore; }
+        else { coinLives--; document.getElementById('coinLives').innerText=coinLives; if(coinLives<=0){coinGameRunning=false; document.getElementById('coinStartBtn').innerText='💀 Game Over - Main Lagi';} }
+        return false;
+      }
+      if (item.y > canvas.height) { if(item.type==='coin'){coinLives--;document.getElementById('coinLives').innerText=coinLives;if(coinLives<=0){coinGameRunning=false;document.getElementById('coinStartBtn').innerText='💀 Game Over - Main Lagi';}} return false; }
+      ctx.font=`${item.size*1.5}px Arial`; ctx.textAlign='center'; ctx.fillText(item.type==='coin'?'🪙':'💣', item.x, item.y);
+      return true;
+    });
+    
+    ctx.fillStyle='#8B4513'; ctx.fillRect(coinBasket.x,coinBasket.y,coinBasket.w,coinBasket.h);
+    ctx.fillStyle='#D2691E'; ctx.fillRect(coinBasket.x,coinBasket.y,coinBasket.w,4);
+    coinLoop = requestAnimationFrame(coinGameLoop);
+  }
+  
+  // Touch/mouse control for coin game
+  document.addEventListener('DOMContentLoaded', () => {
+    const c = document.getElementById('coinCanvas');
+    const moveHandler = (clientX) => {
+      const rect = c.getBoundingClientRect();
+      const scaleX = c.width / rect.width;
+      coinBasket.x = Math.max(0, Math.min(c.width-coinBasket.w, (clientX-rect.left)*scaleX - coinBasket.w/2));
+    };
+    c.addEventListener('mousemove', e => moveHandler(e.clientX));
+    c.addEventListener('touchmove', e => { e.preventDefault(); moveHandler(e.touches[0].clientX); }, {passive:false});
+  });
+
+  // Guess Game
+  function newGuessRound() {
+    currentFood = foods[Math.floor(Math.random()*foods.length)];
+    document.getElementById('guessEmoji').innerText = currentFood.emoji;
+    document.getElementById('guessFoodName').innerText = currentFood.name;
+    document.getElementById('guessInput').value = '';
+    document.getElementById('guessFeedback').innerText = '';
+    document.getElementById('guessFeedback').style.color = 'var(--dark)';
+  }
+  function checkGuess() {
+    const val = parseInt(document.getElementById('guessInput').value);
+    const fb = document.getElementById('guessFeedback');
+    if (isNaN(val)) { fb.innerText = 'Masukkan angka!'; fb.style.color = 'var(--danger)'; return; }
+    
+    const diff = Math.abs(val - currentFood.cal);
+    if (diff <= 30) {
+      fb.innerText = `🎉 Tepat! (${currentFood.cal} kkal)`; fb.style.color = '#059669';
+      guessStreak++;
+      setTimeout(newGuessRound, 1500);
+    } else if (diff <= 100) {
+      fb.innerText = val < currentFood.cal ? '📈 Hampir! Lebih tinggi dikit' : '📉 Hampir! Lebih rendah dikit';
+      fb.style.color = 'var(--accent)';
+    } else {
+      fb.innerText = val < currentFood.cal ? '⬆️ Terlalu rendah!' : '⬇️ Terlalu tinggi!';
+      fb.style.color = 'var(--danger)';
+      guessStreak = 0;
     }
+    document.getElementById('guessStreak').innerText = guessStreak;
+  }
 
-    // === GAME ===
-    let canvas, ctx, gameLoop=null, score=0, lives=3, basket={x:0,y:0,w:70,h:15}, items=[], gameRunning=false, lastSpawn=0;
-    function openGame(){document.getElementById('gameModal').classList.add('active');canvas=document.getElementById('gameCanvas');ctx=canvas.getContext('2d');basket.x=canvas.width/2-basket.w/2;basket.y=canvas.height-40;document.getElementById('highScore').innerText=localStorage.getItem('coinHighScore')||0;drawGame();}
-    function closeGame(){document.getElementById('gameModal').classList.remove('active');stopGame();}
-    function startGame(){score=0;lives=3;items=[];lastSpawn=0;gameRunning=true;document.getElementById('gameOver').classList.remove('active');document.getElementById('gameScore').innerText=score;document.getElementById('gameLives').innerText=lives;if(gameLoop)cancelAnimationFrame(gameLoop);loop();}
-    function stopGame(){gameRunning=false;if(gameLoop)cancelAnimationFrame(gameLoop);}
-    function spawnItem(){const b=Math.random()<0.2;items.push({x:Math.random()*(canvas.width-30)+15,y:-30,type:b?'bomb':'coin',speed:2+Math.random()*2+score*0.01,size:b?25:20});}
-    function loop(){if(!gameRunning)return;ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle='rgba(255,255,255,0.6)';for(let i=0;i<3;i++){ctx.beginPath();ctx.arc(80+i*100+Math.sin(Date.now()/3000+i)*20,60+i*30,20,0,Math.PI*2);ctx.fill();}if(Date.now()-lastSpawn>800){spawnItem();lastSpawn=Date.now();}items=items.filter(item=>{item.y+=item.speed;if(item.y+item.size>basket.y&&item.y<basket.y+basket.h&&item.x>basket.x&&item.x<basket.x+basket.w){if(item.type==='coin'){score+=10;document.getElementById('gameScore').innerText=score;}else{lives--;document.getElementById('gameLives').innerText=lives;ctx.fillStyle='rgba(255,0,0,0.3)';ctx.fillRect(0,0,canvas.width,canvas.height);if(lives<=0)endGame();}return false;}if(item.y>canvas.height){if(item.type==='coin'){lives--;document.getElementById('gameLives').innerText=lives;if(lives<=0)endGame();}return false;}ctx.font=`${item.size*1.5}px Arial`;ctx.textAlign='center';ctx.fillText(item.type==='coin'?'🪙':'💣',item.x,item.y);return true;});ctx.fillStyle='#8B4513';ctx.fillRect(basket.x,basket.y,basket.w,basket.h);ctx.fillStyle='#D2691E';ctx.fillRect(basket.x,basket.y,basket.w,4);ctx.fillStyle='#654321';for(let i=0;i<5;i++)ctx.fillRect(basket.x+i*15,basket.y+4,2,basket.h-4);gameLoop=requestAnimationFrame(loop);}
-    function drawGame(){ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#8B4513';ctx.fillRect(basket.x,basket.y,basket.w,basket.h);ctx.font='30px Arial';ctx.textAlign='center';ctx.fillText('🪙',canvas.width/2,100);ctx.font='14px Arial';ctx.fillStyle='#333';ctx.fillText('Geser keranjang untuk menangkap koin!',canvas.width/2,140);ctx.fillText('Hindari bom 💣',canvas.width/2,160);}
-    function endGame(){gameRunning=false;document.getElementById('finalScore').innerText=score;const hs=parseInt(localStorage.getItem('coinHighScore')||0);if(score>hs){localStorage.setItem('coinHighScore',score);document.getElementById('highScore').innerText=score;triggerConfetti();}else{document.getElementById('highScore').innerText=hs;}document.getElementById('gameOver').classList.add('active');}
-    document.addEventListener('DOMContentLoaded',()=>{const c=document.getElementById('gameCanvas');c.addEventListener('mousemove',e=>{const r=c.getBoundingClientRect();const sx=c.width/r.width;basket.x=Math.max(0,Math.min(c.width-basket.w,(e.clientX-r.left)*sx-basket.w/2));});c.addEventListener('touchmove',e=>{e.preventDefault();const r=c.getBoundingClientRect();const sx=c.width/r.width;basket.x=Math.max(0,Math.min(c.width-basket.w,(e.touches[0].clientX-r.left)*sx-basket.w/2));},{passive:false});});
-
-    // === FETCH DATA DARI API (PENGGANTI google.script.run) ===
-    setStickmanState('loading');
-    fetch(URL_API, { redirect: 'follow' })
-      .then(r => r.json())
-      .then(data => { appData = data; renderSummary(); setStickmanState('idle'); })
-      .catch(err => {
-        document.getElementById('periodList').innerHTML = '<div class="loading" style="color:red">Gagal memuat data. Pastikan URL API benar & izin akses terbuka.</div>';
-        setStickmanState('idle');
-      });
-
-    // === RENDER & NAVIGASI ===
-    function renderSummary(){let gS=0,gN=0,gP=appData.periods.length;appData.periods.forEach(p=>{gS+=p.totalSekolah;gN+=p.totalNominal;});document.getElementById('summaryTotal').innerHTML=`<div class="total-item"><div class="label">📊 Total Periode</div><div class="value">${gP}</div></div><div class="total-item"><div class="label">🏫 Total Sekolah</div><div class="value">${gS}</div></div><div class="total-item nominal"><div class="label">💰 Grand Total</div><div class="value">${formatRupiah(gN)}</div></div>`;let l=document.getElementById('periodList');if(!appData.periods||!appData.periods.length){l.innerHTML='<div class="loading">Tidak ada data.</div>';return;}let h='';appData.periods.forEach((p,i)=>{h+=`<div class="period-card" onclick="showPeriod(${i})"><div class="period-icon">📅</div><h3>${p.name}</h3><div class="meta"><span>🏫 ${p.totalSekolah} Sekolah</span><span>👥 PIC</span></div><div class="total-nominal">${formatRupiah(p.totalNominal)}</div><span class="arrow">→</span></div>`;});l.innerHTML=h;}
-    function showSummary(){animateTransition(()=>{document.getElementById('viewSummary').classList.remove('hidden');document.getElementById('viewPeriod').classList.add('hidden');document.getElementById('viewDetail').classList.add('hidden');window.scrollTo(0,0);});}
-    function showPeriod(idx){animateTransition(()=>{currentPeriodIdx=idx;let p=appData.periods[idx];document.getElementById('breadcrumbPeriod').innerHTML=`<a onclick="showSummary()">🏠 Summary</a><span class="sep">›</span><span class="current">📅 ${p.name}</span>`;document.getElementById('periodHeader').innerHTML=`<h2>📅 Periode: ${p.name}</h2><p>🏫 ${p.totalSekolah} Sekolah • 💰 Total: ${formatRupiah(p.totalNominal)}</p>`;let l=document.getElementById('schoolList'),h='';p.schools.forEach((s,i)=>{h+=`<div class="school-card" onclick="showDetail(${idx},${i})"><h4>🏫 ${s.sekolah}</h4><div class="info"><span>${s.bank} • ${s.pic.split(' ')[0]}</span><span class="nominal">${formatRupiah(s.nominal)}</span></div></div>`;});l.innerHTML=h;document.getElementById('viewSummary').classList.add('hidden');document.getElementById('viewPeriod').classList.remove('hidden');document.getElementById('viewDetail').classList.add('hidden');window.scrollTo(0,0);});}
-    function showDetail(pIdx,sIdx){animateTransition(()=>{let p=appData.periods[pIdx],s=p.schools[sIdx];document.getElementById('breadcrumbDetail').innerHTML=`<a onclick="showSummary()">🏠 Summary</a><span class="sep">›</span><a onclick="showPeriod(${pIdx})">📅 ${p.name}</a><span class="sep">›</span><span class="current">🏫 ${s.sekolah}</span>`;document.getElementById('detailSekolah').innerText=s.sekolah;document.getElementById('detailNo').innerText='Data No. '+s.no+' • Periode '+p.name;document.getElementById('detailPIC').innerText=s.pic;document.getElementById('detailBank').innerText=s.bank;document.getElementById('detailRek').innerText=s.rekening;document.getElementById('detailNom').innerText=formatRupiah(s.nominal);let ic=document.getElementById('imgContainer');ic.innerHTML=getStickmanLoader();setStickmanState('loading');if(s.fullUrl){const img=new Image();img.onload=function(){ic.innerHTML=`<img src="${s.fullUrl}" class="bukti-img" onclick="openZoom('${s.fullUrl}')">`;setStickmanState('idle');};img.onerror=function(){ic.innerHTML='<div class="no-image">❌ Gagal memuat gambar<br><small>Periksa izin akses file di Drive</small></div>';setStickmanState('idle');};img.src=s.fullUrl;}else{setTimeout(()=>{ic.innerHTML='<div class="no-image">📭 Tidak ada bukti transfer</div>';setStickmanState('idle');},500);}document.getElementById('viewSummary').classList.add('hidden');document.getElementById('viewPeriod').classList.add('hidden');document.getElementById('viewDetail').classList.remove('hidden');window.scrollTo(0,0);});}
-    function openZoom(src){document.getElementById('zoomImg').src=src;document.getElementById('zoomModal').classList.add('active');}
-    function closeZoom(){document.getElementById('zoomModal').classList.remove('active');}
-    setTimeout(()=>{document.getElementById('stickmanMascot').classList.add('enter');setTimeout(()=>document.getElementById('stickmanMascot').classList.remove('enter'),700);},500);
-  </script>
+  // Init stickman position after load
+  setTimeout(placeStickmanOnFirstCard, 1000);
+</script>
 </body>
 </html>
